@@ -20,10 +20,9 @@ This is intended to run on a TeamCity agent in AWS.
 ### Terraform Apply
 
 ```sh
-terraform apply \
-	-var=facility=ams1 \
-	-var=ovftool_url=$(aws s3 presign s3://BUCKET-NAME/vmware-ovftool/VMware-ovftool-4.3.0-7948156-lin.x86_64.bundle) \
-	-var=vcsa_iso_url=$(aws s3 presign s3://BUCKET-NAME/vmware-vsphere/VMware-VCSA-all-6.7.0-11726888.iso)
+export TF_VAR_ovftool_url=$(aws s3 presign s3://BUCKET-NAME/vmware-ovftool/VMware-ovftool-4.3.0-7948156-lin.x86_64.bundle)
+export TF_VAR_vcsa_iso_url=$(aws s3 presign s3://BUCKET-NAME/vmware-vsphere/VMware-VCSA-all-6.7.0-11726888.iso)
+terraform apply -var=facility=ams1 -var=plan=m1.xlarge.x86
 ```
 
 Use `output`s to set environment variables accordingly:

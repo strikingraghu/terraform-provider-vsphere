@@ -189,6 +189,69 @@ SCRIPT
   }
 }
 
+resource "packet_vlan" "mgmt" {
+  description = "vsphere-mgmt"
+  facility    = "${var.facility}"
+  project_id  = "${packet_project.test.id}"
+}
+resource "packet_port_vlan_attachment" "mgmt" {
+  device_id = "${packet_device.esxi.id}"
+  vlan_vnid = "${packet_vlan.mgmt.vxlan}"
+  port_name = "eth1"
+}
+
+resource "packet_vlan" "nested-mgmt" {
+  description = "vsphere-nested-mgmt"
+  facility    = "${var.facility}"
+  project_id  = "${packet_project.test.id}"
+}
+resource "packet_port_vlan_attachment" "nested-mgmt" {
+  device_id = "${packet_device.esxi.id}"
+  vlan_vnid = "${packet_vlan.nested-mgmt.vxlan}"
+  port_name = "eth0"
+}
+
+resource "packet_vlan" "public1" {
+  description = "vsphere-public1"
+  facility    = "${var.facility}"
+  project_id  = "${packet_project.test.id}"
+}
+resource "packet_port_vlan_attachment" "public1" {
+  device_id = "${packet_device.esxi.id}"
+  vlan_vnid = "${packet_vlan.public1.vxlan}"
+  port_name = "eth0"
+}
+resource "packet_vlan" "public2" {
+  description = "vsphere-public2"
+  facility    = "${var.facility}"
+  project_id  = "${packet_project.test.id}"
+}
+resource "packet_port_vlan_attachment" "public2" {
+  device_id = "${packet_device.esxi.id}"
+  vlan_vnid = "${packet_vlan.public2.vxlan}"
+  port_name = "eth0"
+}
+resource "packet_vlan" "public3" {
+  description = "vsphere-public3"
+  facility    = "${var.facility}"
+  project_id  = "${packet_project.test.id}"
+}
+resource "packet_port_vlan_attachment" "public3" {
+  device_id = "${packet_device.esxi.id}"
+  vlan_vnid = "${packet_vlan.public3.vxlan}"
+  port_name = "eth0"
+}
+resource "packet_vlan" "nsxt-public" {
+  description = "vsphere-nsxt-public"
+  facility    = "${var.facility}"
+  project_id  = "${packet_project.test.id}"
+}
+resource "packet_port_vlan_attachment" "nsxt-public" {
+  device_id = "${packet_device.esxi.id}"
+  vlan_vnid = "${packet_vlan.nsxt-public.vxlan}"
+  port_name = "eth0"
+}
+
 data "packet_operating_system" "esxi" {
   name = "VMware ESXi"
   distro = "vmware"
@@ -204,6 +267,7 @@ resource "packet_device" "esxi" {
   billing_cycle = "hourly"
   project_id = "${packet_project.test.id}"
   project_ssh_key_ids = ["${packet_project_ssh_key.test.id}"]
+  network_type = "layer2-individual"
 
   provisioner "remote-exec" {
     connection {
