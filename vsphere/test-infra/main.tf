@@ -46,13 +46,6 @@ resource "packet_project" "test" {
   name = "Terraform Acc Test vSphere"
 }
 
-data "packet_operating_system" "helper" {
-  name             = "CentOS"
-  distro           = "centos"
-  version          = "7"
-  provisionable_on = "t1.small.x86"
-}
-
 data "local_file" "esxi_thumbprint" {
   filename   = "${path.module}/${local.esxi_ssl_cert_thumbprint_path}"
   depends_on = ["packet_device.esxi"]
@@ -101,10 +94,20 @@ resource "packet_project_ssh_key" "test" {
   project_id = "${packet_project.test.id}"
 }
 
+locals {
+  helper_plan = "t1.small.x86"
+}
+
+data "packet_operating_system" "helper" {
+  name             = "CentOS"
+  distro           = "centos"
+  version          = "7"
+  provisionable_on = "${local.helper_plan}"
+}
 
 resource "packet_device" "helper" {
   hostname            = "tf-acc-vmware-helper"
-  plan                = "t1.small.x86"
+  plan                = "${local.helper_plan}"
   facilities          = ["${var.facility}"]
   operating_system    = "${data.packet_operating_system.helper.id}"
   billing_cycle       = "hourly"
@@ -208,7 +211,7 @@ resource "packet_vlan" "nested-mgmt" {
 resource "packet_port_vlan_attachment" "nested-mgmt" {
   device_id = "${packet_device.esxi.id}"
   vlan_vnid = "${packet_vlan.nested-mgmt.vxlan}"
-  port_name = "eth0"
+  port_name = "eth1"
 }
 
 resource "packet_vlan" "public1" {
@@ -219,7 +222,7 @@ resource "packet_vlan" "public1" {
 resource "packet_port_vlan_attachment" "public1" {
   device_id = "${packet_device.esxi.id}"
   vlan_vnid = "${packet_vlan.public1.vxlan}"
-  port_name = "eth0"
+  port_name = "eth1"
 }
 resource "packet_vlan" "public2" {
   description = "vsphere-public2"
@@ -229,7 +232,7 @@ resource "packet_vlan" "public2" {
 resource "packet_port_vlan_attachment" "public2" {
   device_id = "${packet_device.esxi.id}"
   vlan_vnid = "${packet_vlan.public2.vxlan}"
-  port_name = "eth0"
+  port_name = "eth1"
 }
 resource "packet_vlan" "public3" {
   description = "vsphere-public3"
@@ -239,7 +242,7 @@ resource "packet_vlan" "public3" {
 resource "packet_port_vlan_attachment" "public3" {
   device_id = "${packet_device.esxi.id}"
   vlan_vnid = "${packet_vlan.public3.vxlan}"
-  port_name = "eth0"
+  port_name = "eth1"
 }
 resource "packet_vlan" "nsxt-public" {
   description = "vsphere-nsxt-public"
@@ -249,7 +252,7 @@ resource "packet_vlan" "nsxt-public" {
 resource "packet_port_vlan_attachment" "nsxt-public" {
   device_id = "${packet_device.esxi.id}"
   vlan_vnid = "${packet_vlan.nsxt-public.vxlan}"
-  port_name = "eth0"
+  port_name = "eth1"
 }
 
 data "packet_operating_system" "esxi" {
@@ -267,7 +270,7 @@ resource "packet_device" "esxi" {
   billing_cycle = "hourly"
   project_id = "${packet_project.test.id}"
   project_ssh_key_ids = ["${packet_project_ssh_key.test.id}"]
-  network_type = "layer2-individual"
+  network_type = "hybrid"
 
   provisioner "remote-exec" {
     connection {

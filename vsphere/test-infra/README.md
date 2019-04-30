@@ -11,8 +11,9 @@ This is intended to run on a TeamCity agent in AWS.
 - Download [VMware vCenter Server Appliance](https://my.vmware.com/group/vmware/details?downloadGroup=VC67U1B&productId=742&rPId=31320)
 - Upload both to an automation-friendly location (such as [S3](https://aws.amazon.com/s3/) or [Wasabi](https://wasabi.com/))
   - Make sure the location of the data is close to the chosen Packet.net facility
-    (e.g. Wasabi's `eu-central-1`/Amsterdam & Packet's `ams1`/Amsterdam).
-    The VCSA ISO has around *4GB*, so downloading may take time with a slow link.
+  	(the VCSA ISO has around *4GB*, so downloading would take a long time with a slow connection), e.g.
+    - Wasabi's `eu-central-1`/Amsterdam & Packet's `ams1`/Amsterdam
+    - AWS S3 `eu-central-1`/Frankfurt & Packet's `fra2`/Frankfurt
 - Create curl-able URLs - see examples below
 
 ## How
@@ -20,9 +21,9 @@ This is intended to run on a TeamCity agent in AWS.
 ### Terraform Apply
 
 ```sh
-export TF_VAR_ovftool_url=$(aws s3 presign s3://BUCKET-NAME/vmware-ovftool/VMware-ovftool-4.3.0-7948156-lin.x86_64.bundle)
-export TF_VAR_vcsa_iso_url=$(aws s3 presign s3://BUCKET-NAME/vmware-vsphere/VMware-VCSA-all-6.7.0-11726888.iso)
-terraform apply -var=facility=ams1 -var=plan=m1.xlarge.x86
+export TF_VAR_ovftool_url=$(aws --profile=vmware s3 presign s3://hc-vmware-eu-central-1/vmware-ovftool/VMware-ovftool-4.3.0-7948156-lin.x86_64.bundle)
+export TF_VAR_vcsa_iso_url=$(aws --profile=vmware s3 presign s3://hc-vmware-eu-central-1/vmware-vsphere/VMware-VCSA-all-6.7.0-11726888.iso)
+terraform apply -var=facility=fra2 -var=plan=c1.xlarge.x86
 ```
 
 Use `output`s to set environment variables accordingly:
